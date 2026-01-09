@@ -1,6 +1,8 @@
 # KALAMAR 🦑
 
-**KALAMAR** is a premium home management system built with React, TypeScript, and Firebase. It features a sophisticated Family Calendar with AI-powered assistant and recurring event support.
+**KALAMAR** is a premium home management system built with React, TypeScript, and Firebase. 
+
+It features a sophisticated Family Calendar with AI-powered assistant and recurring event support.
 
 ## ✨ Features
 
