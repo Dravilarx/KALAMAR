@@ -12,8 +12,8 @@ import {
     onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import type { CalendarEvent, CalendarEventInput, RecurrenceFrequency } from '../types/calendar';
-import { addDays, addWeeks, addMonths, addYears, isBefore, isAfter, isSameDay, startOfDay } from 'date-fns';
+import type { CalendarEvent, CalendarEventInput } from '../types/calendar';
+import { addDays, addWeeks, addMonths, addYears, isBefore, isAfter, startOfDay } from 'date-fns';
 
 const COLLECTION_NAME = 'calendarEvents';
 
