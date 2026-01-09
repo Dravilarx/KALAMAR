@@ -10,7 +10,6 @@ import {
     orderBy,
     Timestamp,
     onSnapshot,
-    or,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { CalendarEvent, CalendarEventInput, RecurrenceFrequency } from '../types/calendar';

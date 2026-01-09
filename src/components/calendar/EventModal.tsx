@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { calendarService } from '../../services/calendarService';
-import type { CalendarEvent, EventCategory } from '../../types/calendar';
+import { X, Calendar, Clock, MapPin, Tag, Users as UsersIcon, Repeat } from 'lucide-react';
+import type { CalendarEvent, EventCategory, CalendarEventInput, RecurrenceFrequency } from '../../types/calendar';
 import { EVENT_CATEGORIES } from '../../types/calendar';
 import type { FamilyMember } from '../../types/family';
 import { format } from 'date-fns';
-import { X, Calendar, Clock, MapPin, Tag, Users as UsersIcon, Repeat } from 'lucide-react';
-import type { CalendarEvent, EventCategory, CalendarEventInput, RecurrenceFrequency } from '../../types/calendar';
 
 interface EventModalProps {
     event: CalendarEvent | null;
@@ -20,6 +19,7 @@ interface EventModalProps {
 const EventModal: React.FC<EventModalProps> = ({
     event,
     initialDate,
+    initialData,
     familyMembers,
     onClose,
     onSave,
