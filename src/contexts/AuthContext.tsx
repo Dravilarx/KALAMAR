@@ -36,6 +36,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (!firebaseUser) {
+                // Auto-login logic
+                const email = 'familia@kalamar.app';
+                const password = 'kalamar-home-secure';
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (error: any) {
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                        try {
+                            const cred = await createUserWithEmailAndPassword(auth, email, password);
+                            const profile: UserProfile = {
+                                id: cred.user.uid,
+                                email,
+                                displayName: 'Familia Kalamar',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                            };
+                            await setDoc(doc(db, 'users', cred.user.uid), profile);
+                        } catch (createError) {
+                            console.error('Error creating default user:', createError);
+                        }
+                    } else {
+                        console.error('Auto-login error:', error);
+                    }
+                }
+                return;
+            }
+
             setUser(firebaseUser);
 
             if (firebaseUser) {

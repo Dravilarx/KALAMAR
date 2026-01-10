@@ -38,7 +38,7 @@ const EventList: React.FC<EventListProps> = ({ events, familyMembers, onEventCli
 
     if (events.length === 0) {
         return (
-            <div className="card-glass text-center py-12">
+            <div className="bg-white dark:bg-bg-secondary rounded-xl border border-glass-white-10 text-center py-12">
                 <p className="text-text-secondary">No hay eventos en este mes</p>
                 <p className="text-text-muted text-sm mt-2">Crea tu primer evento para comenzar</p>
             </div>
@@ -46,16 +46,16 @@ const EventList: React.FC<EventListProps> = ({ events, familyMembers, onEventCli
     }
 
     return (
-        <div className="card-glass">
-            <h3 className="text-xl font-semibold mb-4">Lista de Eventos</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold mb-6 text-text-primary">Próximos Eventos</h3>
 
             {/* Search and Filter */}
-            <div className="flex gap-3 mb-4">
+            <div className="flex gap-3 mb-6">
                 <div className="flex-1 relative">
-                    <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted" />
+                    <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
-                        className="input pl-10"
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
                         placeholder="Buscar eventos..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -63,7 +63,7 @@ const EventList: React.FC<EventListProps> = ({ events, familyMembers, onEventCli
                 </div>
                 <div className="relative">
                     <select
-                        className="input pr-10"
+                        className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors appearance-none pr-10"
                         value={selectedCategory || ''}
                         onChange={(e) => setSelectedCategory(e.target.value || null)}
                     >
@@ -87,8 +87,8 @@ const EventList: React.FC<EventListProps> = ({ events, familyMembers, onEventCli
                         const date = new Date(dateKey);
 
                         return (
-                            <div key={dateKey}>
-                                <h4 className="text-sm font-semibold text-text-secondary mb-3 capitalize">
+                            <div key={dateKey} className="mb-6">
+                                <h4 className="text-xs font-semibold text-text-muted uppercase mb-3 capitalize">
                                     {format(date, 'EEEE, d MMMM', { locale: es })}
                                 </h4>
                                 <div className="space-y-2">
@@ -101,7 +101,7 @@ const EventList: React.FC<EventListProps> = ({ events, familyMembers, onEventCli
                                         return (
                                             <div
                                                 key={event.id}
-                                                className="p-4 bg-bg-tertiary border border-glass-white-5 rounded-lg hover:border-primary transition-all cursor-pointer"
+                                                className="p-4 bg-bg-tertiary border border-glass-white-5 rounded-lg hover:border-primary hover:shadow-sm transition-all cursor-pointer"
                                                 onClick={() => onEventClick(event)}
                                             >
                                                 <div className="flex items-start gap-3">

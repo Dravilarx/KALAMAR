@@ -44,27 +44,19 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 function App() {
+  // Apply light theme globally
+  React.useEffect(() => {
+    document.body.classList.add('light-theme');
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
           {/* Public routes */}
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicRoute>
-                <Register />
-              </PublicRoute>
-            }
-          />
+          {/* Public routes - Redirect to home as we use auto-login */}
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/register" element={<Navigate to="/" replace />} />
 
           {/* Protected routes */}
           <Route

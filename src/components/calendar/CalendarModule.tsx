@@ -4,10 +4,12 @@ import { calendarService } from '../../services/calendarService';
 import { familyService } from '../../services/familyService';
 import type { CalendarEvent } from '../../types/calendar';
 import type { FamilyMember } from '../../types/family';
-import { startOfMonth, endOfMonth, addMonths, subMonths, format } from 'date-fns';
+import { startOfMonth, endOfMonth, addMonths, subMonths, addDays, subDays, addWeeks, subWeeks, startOfWeek, endOfWeek, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Users, Calendar as CalendarIcon } from 'lucide-react';
 import CalendarGrid from './CalendarGrid';
+import DayView from './DayView';
+import WeekView from './WeekView';
 import EventModal from './EventModal';
 import EventList from './EventList';
 import FamilyManager from '../family/FamilyManager';
@@ -15,8 +17,11 @@ import AIAssistantModal from './AIAssistantModal';
 import { Sparkles } from 'lucide-react';
 import type { CalendarEventInput } from '../../types/calendar';
 
+type ViewMode = 'day' | 'week' | 'month';
+
 const CalendarModule: React.FC = () => {
     const { user } = useAuth();
+    const [viewMode, setViewMode] = useState<ViewMode>('month');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
@@ -35,8 +40,22 @@ const CalendarModule: React.FC = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const start = startOfMonth(currentDate);
-                const end = endOfMonth(currentDate);
+                let start: Date;
+                let end: Date;
+
+                // Determine date range based on view mode
+                if (viewMode === 'day') {
+                    start = new Date(currentDate);
+                    start.setHours(0, 0, 0, 0);
+                    end = new Date(currentDate);
+                    end.setHours(23, 59, 59, 999);
+                } else if (viewMode === 'week') {
+                    start = startOfWeek(currentDate, { locale: es });
+                    end = endOfWeek(currentDate, { locale: es });
+                } else {
+                    start = startOfMonth(currentDate);
+                    end = endOfMonth(currentDate);
+                }
 
                 const [eventsData, membersData] = await Promise.all([
                     calendarService.getEventsByDateRange(user.uid, start, end),
@@ -53,14 +72,30 @@ const CalendarModule: React.FC = () => {
         };
 
         loadData();
-    }, [user, currentDate]);
+    }, [user, currentDate, viewMode]);
 
-    const handlePreviousMonth = () => {
-        setCurrentDate(subMonths(currentDate, 1));
+    const handlePrevious = () => {
+        if (viewMode === 'day') {
+            setCurrentDate(subDays(currentDate, 1));
+        } else if (viewMode === 'week') {
+            setCurrentDate(subWeeks(currentDate, 1));
+        } else {
+            setCurrentDate(subMonths(currentDate, 1));
+        }
     };
 
-    const handleNextMonth = () => {
-        setCurrentDate(addMonths(currentDate, 1));
+    const handleNext = () => {
+        if (viewMode === 'day') {
+            setCurrentDate(addDays(currentDate, 1));
+        } else if (viewMode === 'week') {
+            setCurrentDate(addWeeks(currentDate, 1));
+        } else {
+            setCurrentDate(addMonths(currentDate, 1));
+        }
+    };
+
+    const handleToday = () => {
+        setCurrentDate(new Date());
     };
 
     const handleDateClick = (date: Date) => {
@@ -118,70 +153,96 @@ const CalendarModule: React.FC = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold mb-2">Calendario Familiar</h1>
-                    <p className="text-text-secondary">Gestiona eventos y actividades del hogar</p>
-                </div>
-                <div className="flex gap-3">
-                    <button
-                        className="btn btn-ghost"
-                        onClick={() => setShowAIModal(true)}
-                    >
-                        <Sparkles size={20} className="text-primary" />
-                        <span>Asistente AI</span>
-                    </button>
-                    <button
-                        className="btn btn-ghost"
-                        onClick={() => setShowFamilyManager(true)}
-                    >
-                        <Users size={20} />
-                        <span>Familia ({familyMembers.length})</span>
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                            setSelectedDate(new Date());
-                            setSelectedEvent(null);
-                            setShowEventModal(true);
-                        }}
-                    >
-                        <Plus size={20} />
-                        <span>Nuevo Evento</span>
-                    </button>
-                </div>
+        <div className="h-full flex flex-col">
+            {/* Simple Header - Datewise Style */}
+            <div className="px-8 py-6 bg-white border-b border-gray-100">
+                <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
             </div>
 
             {/* Calendar Navigation */}
-            <div className="card-glass mb-6">
-                <div className="flex items-center justify-between mb-6">
-                    <button onClick={handlePreviousMonth} className="btn btn-ghost btn-sm">
-                        <ChevronLeft size={20} />
-                    </button>
-                    <h2 className="text-2xl font-semibold capitalize">
-                        {format(currentDate, 'MMMM yyyy', { locale: es })}
-                    </h2>
-                    <button onClick={handleNextMonth} className="btn btn-ghost btn-sm">
-                        <ChevronRight size={20} />
-                    </button>
-                </div>
+            <div className="px-8 py-4 bg-white border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                    {/* Date Navigation */}
+                    <div className="flex items-center gap-3">
+                        <button onClick={handlePrevious} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                            <ChevronLeft size={20} className="text-gray-600" />
+                        </button>
+                        <h2 className="text-base font-semibold text-gray-900 min-w-[200px] text-center">
+                            {viewMode === 'day' && format(currentDate, "MMMM, yyyy", { locale: es })}
+                            {viewMode === 'week' && format(currentDate, "MMMM, yyyy", { locale: es })}
+                            {viewMode === 'month' && format(currentDate, 'MMMM, yyyy', { locale: es })}
+                        </h2>
+                        <button onClick={handleNext} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                            <ChevronRight size={20} className="text-gray-600" />
+                        </button>
+                    </div>
 
-                <CalendarGrid
-                    currentDate={currentDate}
-                    events={events}
-                    onDateClick={handleDateClick}
-                    onEventClick={handleEventClick}
-                />
+                    {/* View Mode Selector - Datewise Style */}
+                    <div className="flex items-center gap-2">
+                        <select className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                            <option>PST</option>
+                        </select>
+                        <div className="flex gap-1">
+                            <button
+                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${viewMode === 'day'
+                                    ? 'bg-gray-900 text-white'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                onClick={() => setViewMode('day')}
+                            >
+                                Day
+                            </button>
+                            <button
+                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${viewMode === 'week'
+                                    ? 'bg-gray-900 text-white'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                onClick={() => setViewMode('week')}
+                            >
+                                Week
+                            </button>
+                            <button
+                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${viewMode === 'month'
+                                    ? 'bg-gray-900 text-white'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                onClick={() => setViewMode('month')}
+                            >
+                                Month
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Event List */}
-            <EventList
-                events={events}
-                familyMembers={familyMembers}
-                onEventClick={handleEventClick}
-            />
+            {/* Calendar Content */}
+            <div className="flex-1 overflow-hidden bg-white">
+                {/* Render appropriate view */}
+                {viewMode === 'day' && (
+                    <DayView
+                        currentDate={currentDate}
+                        events={events}
+                        onDateClick={handleDateClick}
+                        onEventClick={handleEventClick}
+                    />
+                )}
+                {viewMode === 'week' && (
+                    <WeekView
+                        currentDate={currentDate}
+                        events={events}
+                        onDateClick={handleDateClick}
+                        onEventClick={handleEventClick}
+                    />
+                )}
+                {viewMode === 'month' && (
+                    <CalendarGrid
+                        currentDate={currentDate}
+                        events={events}
+                        onDateClick={handleDateClick}
+                        onEventClick={handleEventClick}
+                    />
+                )}
+            </div>
 
             {/* Event Modal */}
             {showEventModal && (
